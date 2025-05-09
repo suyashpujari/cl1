@@ -1,13 +1,193 @@
-******Assignment 1******
+-------------------------Assignment 1-------------------------
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 csv=pd.read_csv(r"C:\Users\dell\Desktop\DMV and ML\DMV Datasets\format1.csv")
-excel=pd.read_excel(r"C:\Users\dell\Desktop\DMV and ML\DMV Datasets\format2.
-↪xlsx")
+excel=pd.read_excel(r"C:\Users\dell\Desktop\DMV and ML\DMV Datasets\format2.xlsx")
 json=pd.read_json(r"C:\Users\dell\Desktop\DMV and ML\DMV Datasets\format3.json")
 
 csv.head()
 excel.head()
+json.head()
+
+df= pd.concat([csv,excel,json])
+df.head()
+
+df.describe()
+
+df.info()
+
+df.Date=pd.to_datetime(df.Date)
+df.Time=pd.to_datetime(df.Time)
+
+df.head()
+
+df.dtypes
+
+df.isnull().sum()
+
+df.duplicated().sum()
+
+total_sales = df['Total'].sum()
+total_sales
+
+average_order_value = df.groupby('Gender')['Total'].mean()
+average_order_value
+
+product_category_distribution = df['Product line'].value_counts()
+product_category_distribution
+
+df.boxplot()
+plt.show()
+
+sns.pairplot(df)
+plt.show()
+
+plt.figure(figsize=(12, 6))
+plt.bar(df['Product line'], df['Total'], color='orange')
+plt.xlabel('Product Category')
+plt.ylabel('Total Sales Amount')
+plt.title('Total Sales by Product Category')
+plt.xticks(rotation=20)
+plt.show()
+
+sales_by_city = df.groupby('City')['Total'].sum()
+plt.figure(figsize=(8, 8))
+plt.pie(sales_by_city,labels=sales_by_city.index, autopct='%1.1f%%',startangle=140)
+plt.title('Total Sales Distribution by City')
+plt.show()
+
+-------------------------Assignment 2-------------------------
+import requests
+import pandas as pd
+import json
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+
+warnings.filterwarnings('ignore')
+API_key = '2cac9177ae64d8f6733f9e5a51d63919'
+countries = ['Jamaica', 'Indonesia', 'United States', 'Turkey', 'Saudi Arabia', 'Egypt', 'China']
+country_name_list = []
+maxtemp = []
+mintemp = []
+humidity = []
+windspeed = []
+
+for country_names in countries:
+    url = f'http://api.openweathermap.org/data/2.5/weather?q={country_names}&APPID={API_key}&units=metric'
+    r = requests.get(url)
+    data = r.json()
+    formatted_json = json.dumps(data, sort_keys = True, indent = 4)
+    print(data)
+    country_name_list.append(data['name'])
+    maxtemp.append(data['main']['temp_max'])
+    mintemp.append(data['main']['temp_min'])
+    humidity.append(data['main']['humidity'])
+    windspeed.append(data['wind']['speed'])
+
+df = pd.DataFrame()
+df['Names'] = country_name_list
+df['Max_Temp'] = maxtemp
+df['Min_Temp'] = mintemp
+df['Humidity'] = humidity
+df['WindSpeed'] = windspeed
+
+df.head()
+
+df.isnull().sum()
+
+df.duplicated().sum()
+
+df.describe()
+
+df.info()
+
+plt.figure(figsize=(12,6))
+plt.bar(df['Names'], df['Max_Temp'], color='crimson')
+plt.title("Max Temperature in different countries")
+plt.ylabel ("Temperature")
+plt.show() 
+
+plt.figure(figsize=(12,6))
+plt.bar(df['Names'], df['Min_Temp'], color='skyblue')
+plt.title("Min Temperature in different countries")
+plt.ylabel("Temperature")
+plt.show()
+
+plt.figure(figsize=(10,6))
+plt.bar(df['Humidity'],df['Max_Temp'],color='lightgreen')
+plt.title('Relation btwn Humidity & Max. Temp.')
+plt.xlabel('Humidity')
+plt.ylabel('Max. Temperature')
+plt.show()
+
+plt.figure(figsize=(12,6))
+plt.bar(df['Names'],df['WindSpeed'],color='yellow')
+plt.title('Locationwise Winspeed Variation')
+plt.xlabel('Countries')
+plt.ylabel('Windspeed')
+plt.show()
+
+sns.pairplot(df)
+plt.show()
+
+corr_matrix = df[['Min_Temp','Humidity']].corr()
+sns.heatmap(corr_matrix, annot=True)
+plt.title("Temperature to Humidity relationship")
+plt.show()
+
+-------------------------Assignment 3-------------------------
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler,LabelEncoder
+from sklearn.model_selection import train_test_split
+
+df=pd.read_csv(r"C:\Users\dell\Desktop\DMV and ML\DMV Datasets\telecom_churn.csv")
+
+df.head()
+
+df.isnull().sum()
+
+df.dropna(inplace=True)
+
+df.duplicated().sum()
+
+df.describe()
+
+df.info()
+
+df.shape
+
+df.drop_duplicates(inplace=True)
+df.columns
+
+df.drop(['customer_id',"state","city","telecom_partner","date_of_registration"],inplace=True,axis=1) 
+df.head()
+
+le=LabelEncoder()
+df["gender"]=le.fit_transform(df["gender"])
+
+avg_salary=df.groupby("age")["estimated_salary"].mean()
+avg_salary.head()
+
+plt.figure(figsize=(12,6))
+df.boxplot()
+plt.show()
+
+avg_salary.plot(kind="line")
+plt.show()
+
+x=df.drop("churn",axis=1)
+y=df["churn"]
+
+df.dtypes
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=42)
+sc=StandardScaler()
+x_train=sc.fit_transform(x_train)x_test=sc.transform(x_test)
+
+df.to_csv("cleaned_telecom_churn.csv",index=False)
