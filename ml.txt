@@ -1,1 +1,39 @@
 -------------------------Assignment 1-------------------------
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import confusion_matrix,accuracy_score,classification_report
+
+df=pd.read_csv(r"C:\Users\dell\Desktop\DMV and ML\ML Datasets\Iris.csv")
+
+df
+
+x=df.drop(["Class Label"],axis=1)
+y=df["Class Label"]
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=100)
+x_train.shape, x_test.shape, y_train.shape, y_test.shape
+
+sc= StandardScaler()
+x_train=sc.fit_transform(x_train)
+x_test=sc.transform(x_test)
+
+lda= LinearDiscriminantAnalysis()
+x_train= lda.fit_transform(x_train,y_train)
+x_test=lda.transform(x_test)
+
+x_train.shape, x_test.shape
+model = LogisticRegression()
+model.fit(x_train,y_train)
+
+y_pred=model.predict(x_test)
+
+accuracy_score(y_test , y_pred)
+
+confusion_matrix(y_test , y_pred)
+
+print(classification_report(y_test, y_pred))
+
